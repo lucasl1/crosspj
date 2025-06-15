@@ -1,0 +1,231 @@
+Objetivos
+Documentação: Criar um guia detalhado com instalação, funcionalidades e histórico de implementações.
+Página Inicial: Implementar uma página index.html com título "Campeonato de CrossFit" e botões para as três funções.
+Ranking Campeonato: Mover a funcionalidade existente (pódio + tabela) para um arquivo separado (ranking.html) e integrá-lo ao sistema.
+Current TOP 5: Criar uma nova página (top5.html) exibindo os 5 melhores atletas com timer em tempo real.
+Qual função: Adicionar um placeholder com sugestões para frameworks e melhorias futuras.
+Arquitetura: Manter modularidade com arquivos separados para HTML, JS e backend, usando Express e WebSocket.
+Documentação do Projeto: Campeonato de CrossFit
+Visão Geral
+O sistema Campeonato de CrossFit é uma aplicação web para gerenciar e exibir resultados de competições de CrossFit em tempo real, com suporte a rankings, pódio, tabela de participantes, timer para provas e integração com uma planilha Excel (campeonato_crossfit.xlsx). O frontend usa Tailwind CSS para estilização, e o backend combina Express (HTTP) e WebSocket para atualizações dinâmicas.
+
+Histórico de Implementações
+Versão Inicial (Campeonato de Cerveja IPA → CrossFit):
+Criada a base com pódio (1º, 2º, 3º) e tabela para exibir dados de uma planilha Excel.
+Campos: Posição, Atleta, Score, Categoria, WOD_1, WOD_2, WOD_3.
+Suporte a qualquer número de participantes, com WebSocket para atualizações em tempo real.
+Tecnologias: HTML, Tailwind CSS, JavaScript, Node.js, ws, xlsx.
+Correção de Erro WebSocket:
+Resolvido o erro ReferenceError: WebSocket is not defined ao garantir que script.js rodasse apenas no navegador.
+Adição do Timer:
+Implementado um timer regressivo com botões Play/Pause e Reset.
+Campo de input para definir tempo inicial (MM:SS).
+Estilizado com Tailwind CSS, integrado ao layout.
+Correção de Exibição de Dados:
+Corrigido o problema de nomes dos atletas não exibidos, ajustando a lógica de renderização.
+Corrigido o formato de tempos no WOD_2, usando raw: true na leitura da planilha.
+Integração com Servidor HTTP:
+Substituído o servidor WebSocket puro por uma combinação de Express e WebSocket.
+Adicionado suporte para servir index.html e arquivos estáticos via HTTP.
+Nova Estrutura (Atual):
+Página inicial com botões para três funções.
+Modularização com arquivos separados para Ranking Campeonato (ranking.html, ranking.js) e Current TOP 5 (top5.html, top5.js).
+Placeholder para Qual função com sugestões de frameworks.
+Documentação completa.
+Funcionalidades
+Página Inicial:
+Título "Campeonato de CrossFit".
+Botões para navegar para Ranking, TOP 5 e Qual função.
+Ranking Campeonato:
+Pódio com os 3 primeiros colocados (nome e score).
+Tabela com todos os participantes, incluindo Posição, Atleta, Score, Categoria, WOD_1, WOD_2, WOD_3.
+Atualização em tempo real via WebSocket ao salvar a planilha.
+Current TOP 5:
+Exibe os 5 atletas com maior pontuação (Score), com nome, score e categoria.
+Timer regressivo com Play/Pause, Reset e input MM:SS.
+Atualização em tempo real dos dados.
+Qual função:
+Placeholder para futura expansão.
+Preparado para integrar frameworks como React ou Vue.js.
+Backend:
+Servidor Express serve arquivos estáticos e index.html.
+WebSocket envia dados da planilha em tempo real.
+Monitoramento de alterações na planilha com fs.watchFile.
+Guia de Instalação
+Pré-requisitos:
+Node.js (v18 ou superior).
+Navegador moderno (Chrome, Firefox, etc.).
+Excel ou software compatível para criar campeonato_crossfit.xlsx.
+Estrutura do Projeto:
+text
+
+Collapse
+
+Wrap
+
+Copy
+campeonato-crossfit/
+├── index.html
+├── ranking.html
+├── top5.html
+├── script.js
+├── ranking.js
+├── top5.js
+├── server.js
+├── campeonato_crossfit.xlsx
+└── package.json
+Instalação:
+Crie um diretório e coloque os arquivos acima.
+Instale as dependências:
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+npm install express ws xlsx
+Crie a planilha campeonato_crossfit.xlsx com o formato especificado.
+Execução:
+Inicie o servidor:
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+node server.js
+Acesse http://localhost:8080 no navegador.
+Edite a planilha e salve para atualizar os dados em tempo real.
+OBS:
+Adicione uma fonte de navegador no OBS com a URL http://localhost:8080.
+Depuração:
+Verifique o terminal para logs do server.js.
+Abra o console do navegador (F12 > Console) para logs do WebSocket.
+Planilha Excel
+Formato:
+
+
+Posição	Atleta	Score	Categoria	WOD_1	WOD_2	WOD_3
+1	João Silva	320	Elite	150 reps	7:45	90 reps
+...	...	...	...	...	...	...
+WOD_2: Use formatação de texto (ex.: "7:45") no Excel.
+Novas Implementações
+1. Página Inicial (index.html)
+Título "Campeonato de CrossFit".
+Três botões estilizados com Tailwind CSS para navegar para:
+Ranking Campeonato (ranking.html).
+Current TOP 5 (top5.html).
+Qual função (placeholder, exibe uma mensagem).
+2. Ranking Campeonato (ranking.html, ranking.js)
+Move a funcionalidade existente para arquivos separados.
+Mantém o pódio, tabela e integração com WebSocket.
+Exibe todos os participantes, com os 3 primeiros destacados.
+3. Current TOP 5 (top5.html, top5.js)
+Exibe os 5 atletas com maior Score.
+Inclui timer com Play/Pause, Reset e input MM:SS.
+Atualização em tempo real via WebSocket.
+4. Qual função
+Placeholder com mensagem "Funcionalidade em Desenvolvimento".
+Sugestões para Futuro:
+React com Vite:
+Migrar para React para componentes reutilizáveis.
+Usar Vite para build rápido e hot-reload.
+Benefício: Melhor gerenciamento de estado e animações fluidas.
+Vue.js com Nuxt:
+Framework leve com suporte a SSR (Server-Side Rendering).
+Ideal para interfaces dinâmicas e SEO.
+Benefício: Simplicidade e integração com WebSocket.
+SvelteKit:
+Framework moderno com compilação em tempo de build.
+Ótimo para interfaces reativas e desempenho.
+Benefício: Menos JavaScript no cliente, design futurista.
+Animações com GSAP:
+Adicionar transições fluidas para atualizações do pódio e tabela.
+Exemplo: Fade-in para novos dados, animação de ranking.
+Suporte a Múltiplas Provas:
+Gerenciar várias provas (WODs) com abas dinâmicas.
+Exibir resultados por prova ou geral.
+Preparação: O código será organizado para facilitar migração para frameworks (ex.: IDs claros, lógica modular).
+Artefatos
+1. index.html
+index.html
+html
+Show inline
+2. ranking.html
+ranking.html
+html
+Show inline
+3. ranking.js
+ranking.js
+javascript
+Show inline
+4. top5.html
+top5.html
+html
+Show inline
+5. top5.js
+top5.js
+javascript
+Show inline
+6. server.js
+server.js
+javascript
+Show inline
+7. package.json
+package.json
+json
+Show inline
+8. Modelo de Planilha Excel (campeonato_crossfit.xlsx)
+campeonato_crossfit.xlsx
+markdown
+Show inline
+Como Usar
+Instale as Dependências:
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+npm install
+Inicie o Servidor:
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+npm start
+Acesse no Navegador:
+Página inicial: http://localhost:8080.
+Ranking: http://localhost:8080/ranking.html.
+TOP 5: http://localhost:8080/top5.html.
+Teste:
+Edite a planilha e salve para ver atualizações.
+Use o timer no TOP 5 (ex.: insira "10:00", clique em Play).
+OBS:
+Adicione uma fonte de navegador com http://localhost:8080.
+Demonstração
+Página Inicial: Botões para Ranking, TOP 5 e Qual função.
+Ranking:
+Pódio: João Silva (1º), Maria Santos (2º), Pedro Costa (3º).
+Tabela: Todos os 8 atletas.
+TOP 5:
+Lista: João Silva, Maria Santos, Pedro Costa, Ana Oliveira, Lucas Pereira.
+Timer: Funciona independentemente do Ranking.
+Notas
+Modularidade: Cada função tem seu próprio HTML e JS, facilitando manutenção.
+Futuro: O botão "Qual função" está pronto para expansão com frameworks.
+Sugestões: Para a próxima iteração, posso implementar uma das opções de framework ou adicionar animações com GSAP.
