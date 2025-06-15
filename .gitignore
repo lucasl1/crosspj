@@ -34,9 +34,9 @@ Thumbs.db
 .cache/
 coverage/
 
-# Arquivos de planilha Excel sensíveis (exemplo)
-# Comente a linha abaixo se desejar versionar a planilha
-campeonato_crossfit.xlsx
+# Planilhas Excel (descomente se desejar versionar)
+# campeonato_crossfit.xlsx
+# current_top5.xlsx
 
 # Arquivos de testes ou backups
 *.bak

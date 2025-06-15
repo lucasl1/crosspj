@@ -25,8 +25,15 @@
         ws.onopen = () => console.log('WebSocket conectado');
         ws.onmessage = (event) => {
           try {
-            const data = JSON.parse(event.data);
-            const sortedData = data.sort((a, b) => (b.Score || 0) - (a.Score || 0));
+            const { ranking } = JSON.parse(event.data);
+            if (!Array.isArray(ranking)) {
+              console.error('Dados de ranking inválidos:', ranking);
+              return;
+            }
+            const sortedData = ranking
+              .filter(row => row.Atleta && row.Score)
+              .sort((a, b) => Number(b.Score) - Number(a.Score));
+            console.log('Dados de ranking processados:', sortedData);
             setAthletes(sortedData);
           } catch (error) {
             console.error('Erro ao processar mensagem WebSocket:', error);

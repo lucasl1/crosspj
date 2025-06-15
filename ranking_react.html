@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking - Campeonato de CrossFit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.20.15/Babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.12.16/dist/framer-motion.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 text-white font-poppins">
+  <div id="root" class="flex items-center justify-center min-h-screen"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { motion } = window.framerMotion;
+
+    const App = () => {
+      const [athletes, setAthletes] = useState([]);
+
+      useEffect(() => {
+        const ws = new WebSocket('ws://localhost:8080');
+        ws.onopen = () => console.log('WebSocket conectado');
+        ws.onmessage = (event) => {
+          try {
+            const { ranking } = JSON.parse(event.data);
+            if (!Array.isArray(ranking)) {
+              console.error('Dados de ranking inválidos:', ranking);
+              return;
+            }
+            const sortedData = ranking
+              .filter(row => row.Atleta && row.Score)
+              .sort((a, b) => Number(b.Score) - Number(a.Score));
+            console.log('Dados de ranking processados:', sortedData);
+            setAthletes(sortedData);
+          } catch (error) {
+            console.error('Erro ao processar mensagem WebSocket:', error);
+          }
+        };
+        ws.onerror = (error) => console.error('Erro no WebSocket:', error);
+        ws.onclose = () => {
+          console.log('WebSocket desconectado, tentando reconectar...');
+          setTimeout(() => ws.connect(), 1000);
+        };
+        return () => ws.close();
+      }, []);
+
+      return (
+        <div className="container max-w-6xl mx-auto p-6 bg-gray-800/90 rounded-2xl shadow-2xl">
+          <h1 className="text-4xl font-bold text-center text-blue-400 uppercase tracking-wide mb-8">
+            Ranking Campeonato de CrossFit 2025
+          </h1>
+          <div className="podium flex justify-center gap-6 mb-12">
+            <motion.div
+              className="podium-item silver bg-gradient-to-t from-gray-400 to-gray-300 text-gray-900 p-6 rounded-lg shadow-lg transform translate-y-6 w-48 text-center"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="rank block text-2xl font-bold">2º</span>
+              <span className="name block text-lg font-semibold mt-2">{athletes[1]?.Atleta || ''}</span>
+              <span className="score block text-sm mt-1">Score: {athletes[1]?.Score || ''}</span>
+            </motion.div>
+            <motion.div
+              className="podium-item gold bg-gradient-to-t from-blue-500 to-blue-300 text-gray-900 p-6 rounded-lg shadow-lg transform w-56 text-center"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <span className="rank block text-3xl font-bold">1º</span>
+              <span className="name block text-xl font-semibold mt-2">{athletes[0]?.Atleta || ''}</span>
+              <span className="score block text-sm mt-1">Score: {athletes[0]?.Score || ''}</span>
+            </motion.div>
+            <motion.div
+              className="podium-item bronze bg-gradient-to-t from-amber-700 to-amber-500 text-gray-900 p-6 rounded-lg shadow-lg transform translate-y-6 w-48 text-center"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <span className="rank block text-2xl font-bold">3º</span>
+              <span className="name block text-lg font-semibold mt-2">{athletes[2]?.Atleta || ''}</span>
+              <span className="score block text-sm mt-1">Score: {athletes[2]?.Score || ''}</span>
+            </motion.div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-blue-400 text-gray-900 uppercase text-sm font-semibold">
+                  <th className="py-4 px-6">Posição</th>
+                  <th className="py-4 px-6">Atleta</th>
+                  <th className="py-4 px-6">Score</th>
+                  <th className="py-4 px-6">Categoria</th>
+                  <th className="py-4 px-6">WOD 1</th>
+                  <th className="py-4 px-6">WOD 2</th>
+                  <th className="py-4 px-6">WOD 3</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700">
+                {athletes.map((row, index) => (
+                  <motion.tr
+                    key={row.Atleta + index}
+                    className="hover:bg-gray-700 transition-colors"
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <td className="py-4 px-6">{index + 1}</td>
+                    <td className="py-4 px-6">{row.Atleta || ''}</td>
+                    <td className="py-4 px-6">{row.Score || ''}</td>
+                    <td className="py-4 px-6">{row.Categoria || ''}</td>
+                    <td className="py-4 px-6">{row.WOD_1 || ''}</td>
+                    <td className="py-4 px-6">{row.WOD_2 || ''}</td>
+                    <td className="py-4 px-6">{row.WOD_3 || ''}</td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <a href="index.html" className="block mt-6 text-blue-400 hover:underline text-center">
+            Voltar à Página Inicial
+          </a>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
