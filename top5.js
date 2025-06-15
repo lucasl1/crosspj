@@ -32,13 +32,19 @@ connectWebSocket();
 
 // Atualizar exibição do TOP 5
 function updateTop5(data) {
+  // Ordenar por Score decrescente
+  const sortedData = data.sort((a, b) => (b.Score || 0) - (a.Score || 0));
   top5Table.innerHTML = '';
-  const top5 = data.slice(0, 5);
+  const top5 = sortedData.slice(0, 5);
   top5.forEach((row, index) => {
+    if (!row.Atleta) {
+      console.warn(`Atleta não definido na posição ${index + 1}:`, row);
+      return;
+    }
     const div = document.createElement('div');
     div.className = 'bg-gray-700 p-4 rounded-lg shadow-md flex justify-between items-center';
     div.innerHTML = `
-      <span class="text-lg font-semibold">${index + 1}º ${row.Atleta || ''}</span>
+      <span class="text-lg font-semibold">${index + 1}º ${row.Atleta}</span>
       <span class="text-sm">Score: ${row.Score || ''} | Categoria: ${row.Categoria || ''}</span>
     `;
     top5Table.appendChild(div);

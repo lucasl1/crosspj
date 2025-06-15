@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qual Função - Campeonato de CrossFit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.20.15/Babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.12.16/dist/framer-motion.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 text-white font-poppins">
+  <div id="root" class="flex items-center justify-center min-h-screen"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { motion } = window.framerMotion;
+
+    const App = () => {
+      const [athletes, setAthletes] = useState([]);
+
+      useEffect(() => {
+        const ws = new WebSocket('ws://localhost:8080');
+        ws.onopen = () => console.log('WebSocket conectado');
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            const sortedData = data.sort((a, b) => (b.Score || 0) - (a.Score || 0));
+            setAthletes(sortedData);
+          } catch (error) {
+            console.error('Erro ao processar mensagem WebSocket:', error);
+          }
+        };
+        ws.onerror = (error) => console.error('Erro no WebSocket:', error);
+        ws.onclose = () => {
+          console.log('WebSocket desconectado, tentando reconectar...');
+          setTimeout(() => ws.connect(), 1000);
+        };
+        return () => ws.close();
+      }, []);
+
+      return (
+        <div className="container max-w-4xl mx-auto p-6 bg-gray-800/90 rounded-2xl shadow-2xl">
+          <h1 className="text-4xl font-bold text-center text-purple-400 uppercase tracking-wide mb-8">
+            Ranking Animado - CrossFit 2025
+          </h1>
+          <div className="grid gap-4">
+            {athletes.map((athlete, index) => (
+              <motion.div
+                key={athlete.Atleta || index}
+                className="bg-gray-700 p-4 rounded-lg shadow-md flex justify-between items-center"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <span className="text-lg font-semibold">{index + 1}º {athlete.Atleta || 'N/A'}</span>
+                <span className="text-sm">Score: {athlete.Score || ''} | Categoria: {athlete.Categoria || ''}</span>
+              </motion.div>
+            ))}
+          </div>
+          <a href="index.html" className="block mt-6 text-purple-400 hover:underline text-center">
+            Voltar à Página Inicial
+          </a>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
