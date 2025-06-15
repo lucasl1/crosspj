@@ -13,7 +13,7 @@ let totalSeconds = 0;
 
 // Conectar ao WebSocket
 function connectWebSocket() {
-  ws = new WebSocket('ws://localhost:8080');
+  ws = new WebSocket('ws://localhost:3000');
   ws.onopen = () => {
     console.log('WebSocket conectado');
   };

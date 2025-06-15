@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOP 5 - Campeonato de CrossFit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.20.15/Babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.12.16/dist/framer-motion.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 text-white font-poppins">
+  <div id="root" className="flex items-center justify-center min-h-screen"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { motion } = window.framerMotion;
+
+    const App = () => {
+      const [athletes, setAthletes] = useState([]);
+      const [totalSeconds, setTotalSeconds] = useState(0);
+      const [isRunning, setIsRunning] = useState(false);
+
+      useEffect(() => {
+        const ws = new WebSocket('ws://localhost:8080');
+        ws.onopen = () => console.log('WebSocket conectado');
+        ws.onmessage = (event) => {
+          try {
+            const { top5 } = JSON.parse(event.data);
+            if (!Array.isArray(top5)) {
+              console.error('Dados de TOP 5 inválidos:', top5);
+              return;
+            }
+            const sortedData = top5
+              .filter(row => row.Atleta && row.Score)
+              .sort((a, b) => Number(b.Score) - Number(a.Score))
+              .slice(0, 5);
+            console.log('Dados de TOP 5 processados:', sortedData);
+            setAthletes(sortedData);
+          } catch (error) {
+            console.error('Erro ao processar mensagem WebSocket:', error);
+          }
+        };
+        ws.onerror = (error) => console.error('Erro no WebSocket:', error);
+        ws.onclose = () => {
+          console.log('WebSocket desconectado, tentando reconectar...');
+          setTimeout(() => ws.connect(), 1000);
+        };
+        return () => ws.close();
+      }, []);
+
+      useEffect(() => {
+        let timerInterval;
+        if (isRunning && totalSeconds > 0) {
+          timerInterval = setInterval(() => {
+            setTotalSeconds((prev) => prev - 1);
+          }, 1000);
+        }
+        return () => clearInterval(timerInterval);
+      }, [isRunning, totalSeconds]);
+
+      const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        return `${mins}:${secs}`;
+      };
+
+      const parseTimeInput = (input) => {
+        const regex = /^(\d+):(\d{2})$/;
+        const match = input.match(regex);
+        if (!match) return null;
+        const minutes = parseInt(match[1]);
+        const seconds = parseInt(match[2]);
+        if (seconds > 59) return null;
+        return minutes * 60 + seconds;
+      };
+
+      const handlePlayPause = (e) => {
+        if (!isRunning) {
+          const inputTime = parseTimeInput(e.target.previousSibling.value);
+          if (inputTime === null && totalSeconds === 0) {
+            alert('Por favor, insira um tempo válido no formato MM:SS');
+            return;
+          }
+          if (totalSeconds === 0) setTotalSeconds(inputTime);
+          setIsRunning(true);
+        } else {
+          setIsRunning(false);
+        }
+      };
+
+      const handleReset = (e) => {
+        setIsRunning(false);
+        const inputTime = parseTimeInput(e.target.previousSibling.previousSibling.previousSibling.value) || 0;
+        setTotalSeconds(inputTime);
+      };
+
+      return (
+        <div className="container max-w-4xl mx-auto p-6 bg-gray-800/90 rounded-2xl shadow-2xl">
+          <h1 className="text-4xl font-bold text-center text-green-400 uppercase tracking-wide mb-8">
+            Current TOP 5 - CrossFit 2025
+          </h1>
+          <div className="timer-section mb-8 flex justify-center items-center gap-4">
+            <div className="flex items-center gap-2">
+              <input
+                id="timerInput"
+                type="text"
+                placeholder="MM:SS"
+                className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-green-400 focus:outline-none focus:ring-2 focus:ring-green-300 w-24 text-center"
+              />
+              <motion.button
+                className={`text-white font-semibold px-4 py-2 rounded-lg ${isRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                onClick={handlePlayPause}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {isRunning ? 'Pause' : 'Play'}
+              </motion.button>
+              <motion.button
+                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg"
+                onClick={handleReset}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Reset
+              </motion.button>
+            </div>
+            <motion.div
+              className="text-2xl font-bold text-green-400"
+              animate={{ scale: isRunning ? [1, 1.1, 1] : 1 }}
+              transition={{ duration: 0.5, repeat: isRunning ? Infinity : 0 }}
+            >
+              {formatTime(totalSeconds)}
+            </motion.div>
+          </div>
+          <div className="top5-list">
+            <div className="grid gap-4">
+              {athletes.map((row, index) => (
+                <motion.div
+                  key={row.Atleta + index}
+                  className="bg-gray-700 p-4 rounded-lg shadow-md flex justify-between items-center"
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <span className="text-lg font-semibold">{index + 1}º {row.Atleta || ''}</span>
+                  <span className="text-sm">Score: {row.Score || ''} | Categoria: {row.Categoria || ''}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+          <a href="index.html" className="block mt-6 text-green-400 hover:underline text-center">
+            Voltar à Página Inicial
+          </a>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
